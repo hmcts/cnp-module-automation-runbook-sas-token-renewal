@@ -1,6 +1,6 @@
 
 locals {
-  runbook_name    = "client_secrets.ps1"
+  runbook_name    = "renew_sas.ps1"
   runbook_content = file("${path.module}/${local.runbook_name}")
 }
 
