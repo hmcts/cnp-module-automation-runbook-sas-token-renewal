@@ -2,14 +2,6 @@ Param(
 
   [string]$environment,
   [string]$product,
-  [string]$prefix,
-
-  [string]$source_client_id,
-  [string]$source_tenant_id,
-
-  [string]$target_tenant_id,
-  [string]$target_application_id,
-  [string]$target_application_secret,
 
   [string]$storage_account_name,
   [string]$container_name,
@@ -76,16 +68,28 @@ Function addSecretToKV() {
 	)
 
 	$validity_period = [Timespan]($expiry_date - $start_Date)
-	$sas = Set-AzKeyVaultManagedStorageSasDefinition -AccountName $storage_account_name -VaultName $key_vault_name -Name accountsas -TemplateUri $sasToken -SasType 'account' -ValidityPeriod $validity_period
-	Get-AzKeyVaultSecret -VaultName $kv.VaultName -Name $sas.Sid.Substring($sas.Sid.LastIndexOf('/')+1)
+	Write-Output "Validity period - $($validity_period)"
+	Write-Output "Converting sas token to secure string"
+	$sas_token = ConvertTo-SecureString "$sasToken" -AsPlainText -Force
+	Write-Output "Adding sas to kv..."
+	$secret = Set-AzKeyVaultSecret -VaultName $key_vault_name -Name $secret_name -SecretValue $secretvalue
+	Write-Output "Secret - $($secret)"
+	Write-OutPut "Secret added to kv!"
 }
 
 ##########################################################
 
 try {
 	
+	# Log in with MI
+	Write-Output "Connecting with MI..."
+	Connect-AzAccount -Identity
+	
+	
 	# Get secret
+	Write-Output "Getting secret..."
 	$secret = Get-AzKeyVaultSecret -VaultName $key_vault_name -Name $secret_name
+	Write-Output "secret - $($secret)"
 
 	# Check if secret exists
 	if ($secret){

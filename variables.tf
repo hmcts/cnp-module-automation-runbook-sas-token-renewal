@@ -49,19 +49,27 @@ variable "automation_account_name" {
   description = "Automation Account Name"
 }
 
-variable "target_tenant_id" {
+variable "storage_account_name" {
   type        = string
-  description = "Target Active Directory Tenant ID. If empty it will use current context"
-  default     = ""
+  description = "Storage Account Name"
 }
-variable "target_application_id" {
+
+variable "container_name" {
   type        = string
-  description = "Application ID with access to Tenant. If target_tenant_id is empty this will not be used."
-  default     = ""
+  description = "Container Name"
 }
-variable "target_application_secret" {
+
+variable "blob_name" {
   type        = string
-  description = "Application Secret with access to Tenant. If target_tenant_id is empty this will not be used."
-  default     = ""
-  sensitive   = true
+  description = "Blob Name"
+}
+
+variable "secret_name" {
+  type        = string
+  description = "Secret Name"
+}
+
+variable "expiry_date" {
+  type        = string
+  description = "Expiry date of the SAS token"
 }

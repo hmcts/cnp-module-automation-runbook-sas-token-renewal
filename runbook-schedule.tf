@@ -1,6 +1,5 @@
 data "azurerm_client_config" "current" {}
 locals {
-  source_managed_identity_id = var.source_managed_identity_id == "" ? data.azurerm_client_config.current.object_id : var.source_managed_identity_id
   source_tenant_id           = data.azurerm_client_config.current.tenant_id
 
   today      = timestamp()
@@ -8,16 +7,17 @@ locals {
   start_time = "01:00:00"
 
   parameters = {
-    application_id_collection = join(",", var.application_id_collection)
-    source_tenant_id          = local.source_tenant_id
-    source_client_id          = local.source_managed_identity_id
-    target_tenant_id          = var.target_tenant_id
-    target_application_id     = var.target_application_id
-    target_application_secret = var.target_application_secret
     environment               = var.environment
     product                   = var.product
-    prefix                    = "auto"
-    key_vault_name            = var.key_vault_name
+	storage_account_name = var.storage_account_name
+	container_name = var.container_name
+	blob_name = var.blob_name
+	key_vault_name            = var.key_vault_name
+	secret_name = var.secret_name
+	permissions = "rl"
+	start_date = local.start_date
+	expiry_date = var.expiry_date
+
   }
 }
 
