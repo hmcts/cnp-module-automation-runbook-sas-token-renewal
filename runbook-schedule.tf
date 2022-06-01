@@ -5,6 +5,7 @@ locals {
   today      = timestamp()
   start_date = formatdate("YYYY-MM-DD", timeadd(local.today, "24h"))
   start_time = "01:00:00"
+  expiry_date = timeadd(start_date, "2160h")
 
   parameters = {
     environment               = var.environment
@@ -16,7 +17,7 @@ locals {
 	secret_name = var.secret_name
 	permissions = "rl"
 	start_date = local.start_date
-	expiry_date = var.expiry_date
+	expiry_date = local.expiry_date
 
   }
 }
