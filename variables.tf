@@ -12,22 +12,10 @@ variable "tags" {
   description = "Runbook Tags"
 }
 
-variable "application_id_collection" {
-  type        = list(string)
-  description = "List of Application IDs to manage"
-  default     = []
-}
-
-variable "source_managed_identity_id" {
-  type        = string
-  description = "Managed Identity to authenticate with. Default will use current context."
-  default     = ""
-}
-
 variable "name" {
   type        = string
-  description = "Runbook Name. Default: rotate-client-secrets"
-  default     = "rotate-client-secrets"
+  description = "Runbook Name. Default: rotate-sas-tokens"
+  default     = "rotate-sas-tokens"
 }
 
 variable "environment" {
@@ -57,11 +45,13 @@ variable "storage_account_name" {
 variable "container_name" {
   type        = string
   description = "Container Name"
+  default     = ""
 }
 
 variable "blob_name" {
   type        = string
   description = "Blob Name"
+  default     = ""
 }
 
 variable "secret_name" {
@@ -72,4 +62,10 @@ variable "secret_name" {
 variable "expiry_date" {
   type        = string
   description = "Expiry date of the SAS token"
+}
+
+variable "sas_permissions" {
+  type        = string
+  description = "Permissions to assign to SAS token. Specified as letters as per https://docs.microsoft.com/en-gb/rest/api/storageservices/create-account-sas#account-sas-permissions-by-operation"
+  default     = "rl"
 }

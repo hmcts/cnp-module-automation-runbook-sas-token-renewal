@@ -11,7 +11,7 @@ resource "azurerm_automation_runbook" "client_serects" {
   automation_account_name = var.automation_account_name
   log_verbose             = var.environment == "prod" ? "false" : "true"
   log_progress            = "true"
-  description             = "This is a runbook to automate the renewal and recycling of Client Secrects"
+  description             = "This is a runbook to automate the recycling of SAS tokens on ${var.storage_account_name}"
   runbook_type            = "PowerShell"
 
   content = local.runbook_content
