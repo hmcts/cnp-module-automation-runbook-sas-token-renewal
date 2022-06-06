@@ -9,7 +9,6 @@ locals {
 
   parameters = {
     environment          = var.environment
-    product              = var.product
     storage_account_name = var.storage_account_name
     container_name       = var.container_name
     blob_name            = var.blob_name

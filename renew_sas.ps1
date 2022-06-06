@@ -1,7 +1,6 @@
 Param(
 
   [string]$environment,
-  [string]$product,
 
   [string]$storage_account_name,
   [string]$container_name,
