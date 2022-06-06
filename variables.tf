@@ -22,10 +22,6 @@ variable "environment" {
   type        = string
   description = "Environment Name e.g. sbox"
 }
-variable "product" {
-  type        = string
-  description = "Product prefix"
-}
 
 variable "key_vault_name" {
   type        = string
