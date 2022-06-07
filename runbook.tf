@@ -4,7 +4,7 @@ locals {
   runbook_content = file("${path.module}/${local.runbook_name}")
 }
 
-resource "azurerm_automation_runbook" "client_serects" {
+resource "azurerm_automation_runbook" "main" {
   name                    = var.name
   location                = var.location
   resource_group_name     = var.resource_group_name

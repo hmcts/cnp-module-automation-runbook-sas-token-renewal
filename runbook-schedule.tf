@@ -20,8 +20,8 @@ locals {
   }
 }
 
-resource "azurerm_automation_schedule" "client_serects" {
-  name                    = "rotate-client-secrets-schedule"
+resource "azurerm_automation_schedule" "schedule" {
+  name                    = "${var.name}-schedule"
   resource_group_name     = var.resource_group_name
   automation_account_name = var.automation_account_name
   frequency               = "Day"
@@ -30,8 +30,8 @@ resource "azurerm_automation_schedule" "client_serects" {
   description             = "This is a schedule to automate the recycling of SAS tokens on ${var.storage_account_name}"
 }
 
-resource "azurerm_automation_schedule" "client_serects_trigger_once" {
-  name                    = "rotate-client-secrets-schedule-single-trigger"
+resource "azurerm_automation_schedule" "trigger_once" {
+  name                    = "${var.name}-schedule-single-trigger"
   resource_group_name     = var.resource_group_name
   automation_account_name = var.automation_account_name
   frequency               = "OneTime"
@@ -39,20 +39,20 @@ resource "azurerm_automation_schedule" "client_serects_trigger_once" {
   description             = "This is a one time trigger to automate the recycling of SAS tokens on ${var.storage_account_name}"
 }
 
-resource "azurerm_automation_job_schedule" "client_serects" {
+resource "azurerm_automation_job_schedule" "schedule" {
   resource_group_name     = var.resource_group_name
   automation_account_name = var.automation_account_name
-  schedule_name           = azurerm_automation_schedule.client_serects.name
-  runbook_name            = azurerm_automation_runbook.client_serects.name
+  schedule_name           = azurerm_automation_schedule.schedule.name
+  runbook_name            = azurerm_automation_runbook.main.name
   parameters              = local.parameters
-  depends_on              = [azurerm_automation_schedule.client_serects]
+  depends_on              = [azurerm_automation_schedule.schedule]
 }
 
-resource "azurerm_automation_job_schedule" "client_serects_trigger_once" {
+resource "azurerm_automation_job_schedule" "trigger_once" {
   resource_group_name     = var.resource_group_name
   automation_account_name = var.automation_account_name
-  schedule_name           = azurerm_automation_schedule.client_serects_trigger_once.name
-  runbook_name            = azurerm_automation_runbook.client_serects.name
+  schedule_name           = azurerm_automation_schedule.trigger_once.name
+  runbook_name            = azurerm_automation_runbook.main.name
   parameters              = local.parameters
-  depends_on              = [azurerm_automation_schedule.client_serects_trigger_once]
+  depends_on              = [azurerm_automation_schedule.trigger_once]
 }
