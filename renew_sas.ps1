@@ -99,11 +99,11 @@ Function addSecretToKV() {
   try {
     $validity_period = [Timespan]($expiry_date - $start_Date)
     Write-Output "Validity period - $($validity_period)"
-	Write-Output "Converting sas to secure string"
-	$sas_secure = ConvertTo-SecureString [String]$sasToken -AsPlainText -Force
+    Write-Output "Converting sas to secure string"
+    $sas_secure = ConvertTo-SecureString [String]$sasToken -AsPlainText -Force
     Write-Output "Adding sas to kv..."
     $secret = Set-AzKeyVaultSecret -VaultName $key_vault_name -Name $secret_name -SecretValue $sas_secure
-    Write-Output "Secret - $($secret)"
+    Write-Output "Secret - $($secret | ConvertTo-Json)"
     Write-OutPut "Secret added to kv!"
   }
   catch {
@@ -126,7 +126,7 @@ try {
   # Get secret
   Write-Output "Getting secret..."
   $secret = Get-AzKeyVaultSecret -VaultName $key_vault_name -Name $secret_name
-  Write-Output "secret - $($secret)"
+  Write-Output "secret - $($secret | ConvertTo-Json)"
 
   # Check if secret exists
   if ($secret) {
