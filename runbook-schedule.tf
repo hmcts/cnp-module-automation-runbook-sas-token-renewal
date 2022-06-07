@@ -5,7 +5,7 @@ locals {
   today       = timestamp()
   start_date  = formatdate("YYYY-MM-DD", timeadd(local.today, "24h"))
   start_time  = "01:00:00"
-  expiry_date = timeadd(local.start_date, "2160h")
+  expiry_date = timeadd(local.start_date, "167h")
 
   parameters = {
     environment          = var.environment
