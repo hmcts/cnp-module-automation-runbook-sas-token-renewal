@@ -15,8 +15,9 @@ Param(
 
 )
 
+
 # Functions
-function checkExpiry($expiry) {
+function checkExpiry([datetime]$expiry) {
   # Get difference between expiry current date and expiry date
   $time_dif = (($expiry) - (Get-Date))
 
@@ -101,8 +102,13 @@ Function addSecretToKV() {
     Write-Output "Validity period - $($validity_period)"
     Write-Output "Converting sas to secure string"
     $sas_secure = ConvertTo-SecureString [String]$sasToken -AsPlainText -Force
+    Write-OutPut "Tagging"
+    $tags = @{
+        expiry = $expiry_date
+    }
+    Write-OutPut "Tags - $($tags | ConvertTo-Json)"
     Write-Output "Adding sas to kv..."
-    $secret = Set-AzKeyVaultSecret -VaultName $key_vault_name -Name $secret_name -SecretValue $sas_secure
+    $secret = Set-AzKeyVaultSecret -VaultName $key_vault_name -Name $secret_name -SecretValue $sas_secure -Tag $tags
     Write-Output "Secret - $($secret | ConvertTo-Json)"
     Write-OutPut "Secret added to kv!"
   }
@@ -129,9 +135,9 @@ try {
   Write-Output "secret - $($secret | ConvertTo-Json)"
 
   # Check if secret exists
-  if ($secret) {
+  if ($secret -and $secret.Tags.Keys -contains "expiry") {
     # Check expiry of secret
-    if (checkExpiry($secret.expires)) {
+    if (checkExpiry($secret.Tags["expiry"])) {
       # Create new token
       Write-Output "Secret needs renewed. Creating new token"
       $sas = generateSAS -saName $storage_account_name -containerName $container_name -blobName $blob_name -permissions $permissions
