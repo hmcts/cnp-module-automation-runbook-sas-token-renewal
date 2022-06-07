@@ -22,7 +22,7 @@ locals {
 }
 
 resource "azurerm_automation_schedule" "schedule" {
-  name                    = "${name}-schedule"
+  name                    = "${var.name}-schedule"
   resource_group_name     = var.resource_group_name
   automation_account_name = var.automation_account_name
   frequency               = "Day"
@@ -32,7 +32,7 @@ resource "azurerm_automation_schedule" "schedule" {
 }
 
 resource "azurerm_automation_schedule" "trigger_once" {
-  name                    = "${name}-schedule-single-trigger"
+  name                    = "${var.name}-schedule-single-trigger"
   resource_group_name     = var.resource_group_name
   automation_account_name = var.automation_account_name
   frequency               = "OneTime"
