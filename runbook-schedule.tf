@@ -2,10 +2,9 @@ data "azurerm_client_config" "current" {}
 locals {
   source_tenant_id = data.azurerm_client_config.current.tenant_id
 
-  today       = timestamp()
-  start_date  = formatdate("YYYY-MM-DD", timeadd(local.today, "24h"))
-  start_time  = "01:00:00"
-  expiry_date = timeadd(local.start_date, "167h")
+  today      = timestamp()
+  start_date = formatdate("YYYY-MM-DD", timeadd(local.today, "24h"))
+  start_time = "01:00:00"
 
   parameters = {
     environment          = var.environment
@@ -15,7 +14,7 @@ locals {
     key_vault_name       = var.key_vault_name
     secret_name          = var.secret_name
     permissions          = var.sas_permissions
-    start_date           = local.start_date
+    start_date           = timestamp()
     expiry_date          = var.expiry_date
 
   }
