@@ -22,7 +22,7 @@ locals {
 }
 
 resource "azurerm_automation_schedule" "client_serects" {
-  name                    = "rotate-client-secrets-schedule"
+  name                    = "${name}-schedule"
   resource_group_name     = var.resource_group_name
   automation_account_name = var.automation_account_name
   frequency               = "Day"
@@ -32,7 +32,7 @@ resource "azurerm_automation_schedule" "client_serects" {
 }
 
 resource "azurerm_automation_schedule" "client_serects_trigger_once" {
-  name                    = "rotate-client-secrets-schedule-single-trigger"
+  name                    = "${name}-schedule-single-trigger"
   resource_group_name     = var.resource_group_name
   automation_account_name = var.automation_account_name
   frequency               = "OneTime"
