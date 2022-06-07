@@ -100,7 +100,7 @@ Function addSecretToKV() {
     $validity_period = [Timespan]($expiry_date - $start_Date)
     Write-Output "Validity period - $($validity_period)"
 	Write-Output "Converting sas to secure string"
-	$sas_secure = ConvertTo-SecureString $sasToken -AsPlainText -Force
+	$sas_secure = ConvertTo-SecureString [String]$sasToken -AsPlainText -Force
     Write-Output "Adding sas to kv..."
     $secret = Set-AzKeyVaultSecret -VaultName $key_vault_name -Name $secret_name -SecretValue $sas_secure
     Write-Output "Secret - $($secret)"
