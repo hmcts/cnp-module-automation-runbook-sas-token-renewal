@@ -21,7 +21,7 @@ locals {
   }
 }
 
-resource "azurerm_automation_schedule" "client_serects" {
+resource "azurerm_automation_schedule" "schedule" {
   name                    = "${name}-schedule"
   resource_group_name     = var.resource_group_name
   automation_account_name = var.automation_account_name
@@ -31,7 +31,7 @@ resource "azurerm_automation_schedule" "client_serects" {
   description             = "This is a schedule to automate the recycling of SAS tokens on ${var.storage_account_name}"
 }
 
-resource "azurerm_automation_schedule" "client_serects_trigger_once" {
+resource "azurerm_automation_schedule" "trigger_once" {
   name                    = "${name}-schedule-single-trigger"
   resource_group_name     = var.resource_group_name
   automation_account_name = var.automation_account_name
