@@ -32,20 +32,20 @@ function checkExpiry([datetime]$expiry) {
 
 }
 
-
 Function generateSAS() {
 
   param (
     $saName,
     $containerName,
     $blobName,
-    $permissions,
-    $resourceGroupName
+    $permissions
   )
   try {
+    
     #Write-Output "Generating Token in SA $storage_account_name"
-    $context = $(Get-AzStorageAccount -ResourceGroupName $resourceGroupName -Name $storage_account_name).Context
+    $context = $(Get-AzStorageAccount -ResourceGroupName $resource_group_name -Name $storage_account_name).Context
     $storage_context = New-AzureStorageContext -ConnectionString $($context.ConnectionString)
+    Enable-AzureRmAlias
 
     if ($containerName -and $blobName) {
       try {
@@ -91,6 +91,7 @@ Function generateSAS() {
   catch {
     Write-Error "Failed Generate Token. Aborting.";
     Write-Error "Error: $($_)";
+    Disable-AzureRmAlias
     exit
   }
 
