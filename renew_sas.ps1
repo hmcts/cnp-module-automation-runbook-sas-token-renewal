@@ -2,6 +2,7 @@ Param(
 
   [string]$environment,
 
+  [string]$resource_group_name,
   [string]$storage_account_name,
   [string]$container_name,
   [string]$blob_name,
@@ -40,14 +41,17 @@ Function generateSAS() {
     $permissions
   )
   try {
-    Write-Output "Generating Token in SA $storage_account_name"
-    $storage_context = New-AzStorageContext -StorageAccountName $storage_account_name
+    
+    #Write-Output "Generating Token in SA $storage_account_name"
+    $context = $(Get-AzStorageAccount -ResourceGroupName $resource_group_name -Name $storage_account_name).Context
+    $storage_context = New-AzureStorageContext -ConnectionString $($context.ConnectionString)
+    Enable-AzureRmAlias
 
     if ($containerName -and $blobName) {
       try {
-        Write-Output "Generating Blob Token for $blobName in Container $containerName in SA $storage_account_name"
+        #Write-Output "Generating Blob Token for $blobName in Container $containerName in SA $storage_account_name"
         # Generate SAS token (blob name)
-        $sas_token = New-AzStorageBlobSASToken -Container $containerName -Blob $blobName -Permission $permissions -StartTime $start_Date -ExpiryTime $expiry_date -Context $storage_context
+        $sas_token = New-AzureStorageBlobSASToken -Container $containerName -Blob $blobName -Permission $permissions -StartTime $start_Date -ExpiryTime $expiry_date -Context $storage_context
         return $sas_token
       }
       catch {
@@ -59,9 +63,9 @@ Function generateSAS() {
     }
     elseif ($containerName) {
       try {
-        Write-Output "Generating Container Token for $containerName in SA $storage_account_name"
+        #Write-Output "Generating Container Token for $containerName in SA $storage_account_name"
         # Generate SAS token (container name)
-        $sas_token = New-AzStorageContainerSASToken -Name $containerName -Permission $permissions -StartTime $start_Date -ExpiryTime $expiry_date -Context $storage_context
+        $sas_token = New-AzureStorageContainerSASToken -Name $containerName -Permission $permissions -StartTime $start_Date -ExpiryTime $expiry_date -Context $storage_context
         return $sas_token
       }
       catch {
@@ -72,9 +76,9 @@ Function generateSAS() {
     }
     else {
       try {
-        Write-Output "Generating Storage Account Token for $storage_account_name"
+        #Write-Output "Generating Storage Account Token for $storage_account_name"
         # Generate SAS token (storage account)
-        $sas_token = New-AzStorageAccountSASToken -Service Blob -ResourceType Service, Container, Object -Permission $permissions -StartTime $start_Date -ExpiryTime $expiry_date -Context $storage_context
+        $sas_token = New-AzureStorageAccountSASToken -Service Blob -ResourceType Service, Container, Object -Permission $permissions -StartTime $start_Date -ExpiryTime $expiry_date -Context $storage_context
         return $sas_token
       }
       catch {
@@ -87,6 +91,7 @@ Function generateSAS() {
   catch {
     Write-Error "Failed Generate Token. Aborting.";
     Write-Error "Error: $($_)";
+    Disable-AzureRmAlias
     exit
   }
 
@@ -101,7 +106,7 @@ Function addSecretToKV() {
     $validity_period = [Timespan]($expiry_date - $start_Date)
     Write-Output "Validity period - $($validity_period)"
     Write-Output "Converting sas to secure string"
-    $sas_secure = ConvertTo-SecureString [String]$sasToken -AsPlainText -Force
+    $sas_secure = ConvertTo-SecureString $sasToken -AsPlainText -Force
     Write-OutPut "Tagging"
     $tags = @{
         expiry = $expiry_date
@@ -140,7 +145,7 @@ try {
     if (checkExpiry($secret.Tags["expiry"])) {
       # Create new token
       Write-Output "Secret needs renewed. Creating new token"
-      $sas = generateSAS -saName $storage_account_name -containerName $container_name -blobName $blob_name -permissions $permissions
+      $sas = generateSAS -saName $storage_account_name -containerName $container_name -blobName $blob_name -permissions $permissions -resourceGroupName $resource_group_name
       # Add token to kv
       addSecretToKV -sasToken $sas
 
@@ -152,7 +157,7 @@ try {
   else {
     Write-Output "Secret does not exist. Creating secret."
     # Create token
-    $sas = generateSAS -saName $storage_account_name -containerName $container_name -blobName $blob_name -permissions $permissions
+    $sas = generateSAS -saName $storage_account_name -containerName $container_name -blobName $blob_name -permissions $permissions -resourceGroupName $resource_group_name
     # Add token to kv
     addSecretToKV -sasToken $sas
   }
