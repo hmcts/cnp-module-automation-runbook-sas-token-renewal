@@ -43,9 +43,9 @@ Function generateSAS() {
   try {
     
     #Write-Output "Generating Token in SA $storage_account_name"
-    $context = $(Get-AzStorageAccount -ResourceGroupName $resource_group_name -Name $storage_account_name).Context
-    $storage_context = New-AzureStorageContext -ConnectionString $($context.ConnectionString)
     Enable-AzureRmAlias
+	$context = $(Get-AzStorageAccount -ResourceGroupName $resource_group_name -Name $storage_account_name).Context
+    $storage_context = New-AzureStorageContext -ConnectionString $($context.ConnectionString)
 
     if ($containerName -and $blobName) {
       try {
