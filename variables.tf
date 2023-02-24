@@ -24,16 +24,16 @@ variable "environment" {
 }
 
 variable "user_assigned_identity_client_id" {
-  type = string
+  type        = string
   description = "If your AA useses a user assinged identity, provide its client ID"
-  default = ""
+  default     = ""
   # https://learn.microsoft.com/en-us/azure/automation/add-user-assigned-identity
 }
 
 variable "bypass_kv_networking" {
-  type = bool
+  type        = bool
   description = "If your AKV has network limitations, this will temporarily allow the AA IP, deafult is false"
-  default = false
+  default     = false
 }
 
 variable "key_vault_name" {

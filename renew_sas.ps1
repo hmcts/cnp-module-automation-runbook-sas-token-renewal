@@ -14,7 +14,7 @@ Param(
   [datetime]$start_date,
   [datetime]$expiry_date,
 
-  [bool]$bypass_akv_network = $false,
+  [bool]$bypass_akv_network,
   [string]$umi_client_id = ""
 
 )
@@ -143,6 +143,7 @@ try {
 
   if($bypass_akv_network){
     $ip = Invoke-RestMethod -Uri api.ipify.org
+    Write-host "Bypass required, add rule for $ip in $key_vault_name"
     Add-AzKeyVaultNetworkRule -IpAddressRange $ip -VaultName $key_vault_name
   }
 
@@ -181,5 +182,6 @@ catch {
 }
 
 if($bypass_akv_network){
+  Write-host "Removing rule for $ip in $key_vault_name"
   Remove-AzKeyVaultNetworkRule -IpAddressRange $ip -VaultName $key_vault_name
 }
