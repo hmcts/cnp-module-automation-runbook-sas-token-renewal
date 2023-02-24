@@ -12,7 +12,10 @@ Param(
 
   [string]$permissions, #might need to change type
   [datetime]$start_date,
-  [datetime]$expiry_date
+  [datetime]$expiry_date,
+
+  [bool]$bypass_akv_network,
+  [string]$umi_client_id = ""
 
 )
 
@@ -128,12 +131,22 @@ Function addSecretToKV() {
 ##########################################################
 
 try {
-	
+
   # Log in with MI
   Write-Output "Connecting with MI..."
-  Connect-AzAccount -Identity
-	
-	
+  if($umi_client_id -ne ""){
+    Write-Host "Using User-managed identity"
+    Connect-AzAccount -Identity -accountId $umi_client_id
+  } else {
+    Connect-AzAccount -Identity
+  }
+
+  if($bypass_akv_network){
+    $ip = Invoke-RestMethod -Uri api.ipify.org
+    Write-host "Bypass required, add rule for $ip in $key_vault_name"
+    Add-AzKeyVaultNetworkRule -IpAddressRange $ip -VaultName $key_vault_name
+  }
+
   # Get secret
   Write-Output "Getting secret..."
   $secret = Get-AzKeyVaultSecret -VaultName $key_vault_name -Name $secret_name
@@ -168,3 +181,7 @@ catch {
   exit
 }
 
+if($bypass_akv_network){
+  Write-host "Removing rule for $ip in $key_vault_name"
+  Remove-AzKeyVaultNetworkRule -IpAddressRange $ip -VaultName $key_vault_name
+}
