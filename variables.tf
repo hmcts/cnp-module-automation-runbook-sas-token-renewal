@@ -23,6 +23,19 @@ variable "environment" {
   description = "Environment Name e.g. sbox"
 }
 
+variable "user_assigned_identity_client_id" {
+  type = string
+  description = "If your AA useses a user assinged identity, provide its client ID"
+  default = ""
+  # https://learn.microsoft.com/en-us/azure/automation/add-user-assigned-identity
+}
+
+variable "bypass_kv_networking" {
+  type = bool
+  description = "If your AKV has network limitations, this will temporarily allow the AA IP, deafult is false"
+  default = false
+}
+
 variable "key_vault_name" {
   type        = string
   description = "Key Vault Name to store secrets"

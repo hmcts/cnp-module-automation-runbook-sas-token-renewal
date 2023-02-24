@@ -17,7 +17,8 @@ locals {
     permissions          = var.sas_permissions
     start_date           = timestamp()
     expiry_date          = var.expiry_date
-
+    bypassAKVNetwork     = var.bypass_kv_networking
+    accountId            = var.user_assigned_identity_client_id
   }
 }
 
