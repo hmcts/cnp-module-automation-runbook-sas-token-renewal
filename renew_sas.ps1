@@ -14,8 +14,8 @@ Param(
   [datetime]$start_date,
   [datetime]$expiry_date,
 
-  [bool]$bypassAKVNetwork = $false,
-  [string]$accountId = ""
+  [bool]$bypass_akv_network = $false,
+  [string]$umi_client_id = ""
 
 )
 
@@ -134,14 +134,14 @@ try {
 
   # Log in with MI
   Write-Output "Connecting with MI..."
-  if($accountId -ne ""){
+  if($umi_client_id -ne ""){
     Write-Host "Using User-managed identity"
-    Connect-AzAccount -Identity -accountId $accountId
+    Connect-AzAccount -Identity -accountId $umi_client_id
   } else {
     Connect-AzAccount -Identity
   }
 
-  if($bypassAKVNetwork){
+  if($bypass_akv_network){
     $ip = Invoke-RestMethod -Uri api.ipify.org
     Add-AzKeyVaultNetworkRule -IpAddressRange $ip -VaultName $key_vault_name
   }
@@ -180,6 +180,6 @@ catch {
   exit
 }
 
-if($bypassAKVNetwork){
+if($bypass_akv_network){
   Remove-AzKeyVaultNetworkRule -IpAddressRange $ip -VaultName $key_vault_name
 }
