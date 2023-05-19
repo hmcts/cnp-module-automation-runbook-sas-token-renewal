@@ -128,7 +128,7 @@ Function addSecretToKV() {
 
 try {
 
-  Log in with MI
+  #Log in with MI
   Write-Output "Connecting with MI..."
   if($umi_client_id -ne ""){
     Write-Host "Using User-managed identity"
