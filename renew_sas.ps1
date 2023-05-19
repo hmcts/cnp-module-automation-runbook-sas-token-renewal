@@ -12,7 +12,6 @@ Param(
 
   [string]$permissions, #might need to change type
   [int]$expiry_days,
-  [int]$remaining_days = 5,
 
   [bool]$bypass_akv_network,
   [string]$umi_client_id = ""
@@ -23,6 +22,7 @@ Param(
 function checkExpiry([datetime]$expiry) {
   # Get difference between expiry current date and expiry date
   $time_dif = (($expiry) - (Get-Date))
+  $remaining_days = [math]::Round(($expiry_days/100)*10)
 
   # If token needs renewed...
   if ($time_dif.Days -le $remaining_days) {
