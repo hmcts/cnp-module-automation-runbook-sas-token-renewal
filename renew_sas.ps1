@@ -12,7 +12,7 @@ Param(
 
   [string]$permissions, #might need to change type
   [int]$expiry_days,
-  [int]$remaining_days = 5,
+  [int]$remaining_days,
 
   [bool]$bypass_akv_network,
   [string]$umi_client_id = ""

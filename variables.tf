@@ -79,3 +79,9 @@ variable "expiry_days" {
   default     = 30
   description = "Number of days that the SAS token should last. Default 30 days"
 }
+
+variable "remaining_days" {
+  type        = number
+  default     = 5
+  description = "Number of days remaining for which the SAS token should be renewed. Default 5 days"
+}
