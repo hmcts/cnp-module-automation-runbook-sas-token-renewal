@@ -11,14 +11,13 @@ Param(
   [string]$secret_name,
 
   [string]$permissions, #might need to change type
-  [datetime]$start_date,
-  [datetime]$expiry_date,
+  [int]$expiry_days,
+  [int]$remaining_days = 5,
 
   [bool]$bypass_akv_network,
   [string]$umi_client_id = ""
 
 )
-
 
 # Functions
 function checkExpiry([datetime]$expiry) {
@@ -26,7 +25,7 @@ function checkExpiry([datetime]$expiry) {
   $time_dif = (($expiry) - (Get-Date))
 
   # If token needs renewed...
-  if ($time_dif.Days -le 5) {
+  if ($time_dif.Days -le $remaining_days) {
     return $true
   }
   else {
@@ -41,20 +40,21 @@ Function generateSAS() {
     $saName,
     $containerName,
     $blobName,
-    $permissions
+    $permissions,
+    $expiry_date,
+    $start_date
   )
   try {
     
     #Write-Output "Generating Token in SA $storage_account_name"
     Enable-AzureRmAlias
-	$context = $(Get-AzStorageAccount -ResourceGroupName $resource_group_name -Name $storage_account_name).Context
+	  $context = $(Get-AzStorageAccount -ResourceGroupName $resource_group_name -Name $storage_account_name).Context
     $storage_context = New-AzureStorageContext -ConnectionString $($context.ConnectionString)
 
     if ($containerName -and $blobName) {
       try {
-        #Write-Output "Generating Blob Token for $blobName in Container $containerName in SA $storage_account_name"
         # Generate SAS token (blob name)
-        $sas_token = New-AzureStorageBlobSASToken -Container $containerName -Blob $blobName -Permission $permissions -StartTime $start_Date -ExpiryTime $expiry_date -Context $storage_context
+        $sas_token = New-AzureStorageBlobSASToken -Container $containerName -Blob $blobName -Permission $permissions -StartTime $start_date -ExpiryTime $expiry_date -Context $storage_context
         return $sas_token
       }
       catch {
@@ -66,9 +66,8 @@ Function generateSAS() {
     }
     elseif ($containerName) {
       try {
-        #Write-Output "Generating Container Token for $containerName in SA $storage_account_name"
         # Generate SAS token (container name)
-        $sas_token = New-AzureStorageContainerSASToken -Name $containerName -Permission $permissions -StartTime $start_Date -ExpiryTime $expiry_date -Context $storage_context
+        $sas_token = New-AzureStorageContainerSASToken -Name $containerName -Permission $permissions -StartTime $start_date -ExpiryTime $expiry_date -Context $storage_context
         return $sas_token
       }
       catch {
@@ -79,9 +78,8 @@ Function generateSAS() {
     }
     else {
       try {
-        #Write-Output "Generating Storage Account Token for $storage_account_name"
         # Generate SAS token (storage account)
-        $sas_token = New-AzureStorageAccountSASToken -Service Blob -ResourceType Service, Container, Object -Permission $permissions -StartTime $start_Date -ExpiryTime $expiry_date -Context $storage_context
+        $sas_token = New-AzureStorageAccountSASToken -Service Blob -ResourceType Service, Container, Object -Permission $permissions -StartTime $start_date -ExpiryTime $expiry_date -Context $storage_context
         return $sas_token
       }
       catch {
@@ -103,20 +101,18 @@ Function generateSAS() {
 Function addSecretToKV() {
 
   param (
-    $sasToken
+    $sasToken,
+    $expiry_date,
+    $start_date
   )
   try {
     $validity_period = [Timespan]($expiry_date - $start_Date)
     Write-Output "Validity period - $($validity_period)"
     Write-Output "Converting sas to secure string"
     $sas_secure = ConvertTo-SecureString $sasToken -AsPlainText -Force
-    Write-OutPut "Tagging"
-    $tags = @{
-        expiry = $expiry_date
-    }
-    Write-OutPut "Tags - $($tags | ConvertTo-Json)"
+
     Write-Output "Adding sas to kv..."
-    $secret = Set-AzKeyVaultSecret -VaultName $key_vault_name -Name $secret_name -SecretValue $sas_secure -Tag $tags
+    $secret = Set-AzKeyVaultSecret -VaultName $key_vault_name -Name $secret_name -SecretValue $sas_secure -Expires $expiry_date -NotBefore $start_date
     Write-Output "Secret - $($secret | ConvertTo-Json)"
     Write-OutPut "Secret added to kv!"
   }
@@ -132,7 +128,7 @@ Function addSecretToKV() {
 
 try {
 
-  # Log in with MI
+  Log in with MI
   Write-Output "Connecting with MI..."
   if($umi_client_id -ne ""){
     Write-Host "Using User-managed identity"
@@ -151,16 +147,18 @@ try {
   Write-Output "Getting secret..."
   $secret = Get-AzKeyVaultSecret -VaultName $key_vault_name -Name $secret_name
   Write-Output "secret - $($secret | ConvertTo-Json)"
+  $start_date = Get-Date
+  $expiry_date = $start_date.AddDays($expiry_days)
 
   # Check if secret exists
-  if ($secret -and $secret.Tags.Keys -contains "expiry") {
+  if ($secret -and $secret.Expires) {
     # Check expiry of secret
-    if (checkExpiry($secret.Tags["expiry"])) {
+    if (checkExpiry($secret.Expires)) {
       # Create new token
       Write-Output "Secret needs renewed. Creating new token"
-      $sas = generateSAS -saName $storage_account_name -containerName $container_name -blobName $blob_name -permissions $permissions -resourceGroupName $resource_group_name
+      $sas = generateSAS -saName $storage_account_name -containerName $container_name -blobName $blob_name -permissions $permissions -resourceGroupName $resource_group_name -start_date $start_date -expiry_date $expiry_date
       # Add token to kv
-      addSecretToKV -sasToken $sas
+      addSecretToKV -sasToken $sas -expiry_date $expiry_date -start_date $start_date
 
     }
     else {
@@ -170,9 +168,9 @@ try {
   else {
     Write-Output "Secret does not exist. Creating secret."
     # Create token
-    $sas = generateSAS -saName $storage_account_name -containerName $container_name -blobName $blob_name -permissions $permissions -resourceGroupName $resource_group_name
+    $sas = generateSAS -saName $storage_account_name -containerName $container_name -blobName $blob_name -permissions $permissions -resourceGroupName $resource_group_name -start_date $start_date -expiry_date $expiry_date
     # Add token to kv
-    addSecretToKV -sasToken $sas
+    addSecretToKV -sasToken $sas -expiry_date $expiry_date -start_date $start_date
   }
 }
 catch {

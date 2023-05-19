@@ -15,8 +15,7 @@ locals {
     key_vault_name       = var.key_vault_name
     secret_name          = var.secret_name
     permissions          = var.sas_permissions
-    start_date           = timestamp()
-    expiry_date          = var.expiry_date
+    expiry_days          = var.expiry_days
     bypass_akv_network   = var.bypass_kv_networking
     umi_client_id        = var.user_assigned_identity_client_id
   }
