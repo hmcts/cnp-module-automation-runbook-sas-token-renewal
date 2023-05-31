@@ -68,13 +68,20 @@ variable "secret_name" {
   description = "Secret Name"
 }
 
-variable "expiry_date" {
-  type        = string
-  description = "Expiry date of the SAS token"
-}
-
 variable "sas_permissions" {
   type        = string
   description = "Permissions to assign to SAS token. Specified as letters as per https://docs.microsoft.com/en-gb/rest/api/storageservices/create-account-sas#account-sas-permissions-by-operation"
   default     = "rl"
+}
+
+variable "expiry_days" {
+  type        = number
+  default     = 30
+  description = "Number of days that the SAS token should last. Default 30 days"
+}
+
+variable "remaining_days" {
+  type        = number
+  default     = 5
+  description = "Number of days remaining for which the SAS token should be renewed. Default 5 days"
 }
