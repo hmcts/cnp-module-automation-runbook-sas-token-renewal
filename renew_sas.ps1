@@ -139,7 +139,7 @@ try {
 
   if($bypass_akv_network){
     $ip = Invoke-RestMethod -Uri api.ipify.org
-    Write-Output "Bypass required, add rule for $ip in $key_vault_name"
+    Write-Output "Bypass required, add rule for $ip/32 in $key_vault_name"
     Add-AzKeyVaultNetworkRule -IpAddressRange "$ip/32" -VaultName $key_vault_name
   }
 
@@ -180,6 +180,6 @@ catch {
 }
 
 if($bypass_akv_network){
-  Write-Output "Removing rule for $ip in $key_vault_name"
+  Write-Output "Removing rule for $ip/32 in $key_vault_name"
   Remove-AzKeyVaultNetworkRule -IpAddressRange "$ip/32" -VaultName $key_vault_name
 }
