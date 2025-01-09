@@ -131,7 +131,7 @@ try {
   #Log in with MI
   Write-Output "Connecting with MI..."
   if($umi_client_id -ne ""){
-    Write-Host "Using User-managed identity"
+    Write-Output "Using User-managed identity"
     Connect-AzAccount -Identity -accountId $umi_client_id
   } else {
     Connect-AzAccount -Identity
@@ -139,8 +139,8 @@ try {
 
   if($bypass_akv_network){
     $ip = Invoke-RestMethod -Uri api.ipify.org
-    Write-host "Bypass required, add rule for $ip in $key_vault_name"
-    Add-AzKeyVaultNetworkRule -IpAddressRange $ip -VaultName $key_vault_name
+    Write-Output "Bypass required, add rule for $ip/32 in $key_vault_name"
+    Add-AzKeyVaultNetworkRule -IpAddressRange "$ip/32" -VaultName $key_vault_name
   }
 
   # Get secret
@@ -180,6 +180,6 @@ catch {
 }
 
 if($bypass_akv_network){
-  Write-host "Removing rule for $ip in $key_vault_name"
-  Remove-AzKeyVaultNetworkRule -IpAddressRange $ip -VaultName $key_vault_name
+  Write-Output "Removing rule for $ip/32 in $key_vault_name"
+  Remove-AzKeyVaultNetworkRule -IpAddressRange "$ip/32" -VaultName $key_vault_name
 }
